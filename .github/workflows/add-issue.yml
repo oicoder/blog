@@ -16,14 +16,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get Added Files
-        id: added-files
-        uses: lots0logs/gh-action-get-changed-files@2.2.2
+        id: files
+        uses: jitterbit/get-changed-files@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          format: 'csv'
 
       - name: List all added files
         run: |
-          for file in ${{ steps.added-files.outputs.deleted }}; do
-            echo "$file was deleted"
-            echo "${HOME}/files_deleted.json"
+          mapfile -d ',' -t added_files < <(printf '%s,' '${{ steps.files.outputs.added }}')
+          for added_file in "${added_files[@]}"; do
+            echo "Do something with this ${added_modified_file}."
           done
