@@ -47,8 +47,8 @@ jobs:
             response=$(node -e "const axios = require('axios'); axios.post('https://api.github.com/repos/oicoder/blog/issues', {
               title: '${title}',
               body: '${body_json}',
-              labels: '${labels}',
-              milestone: '${milestone}'
+              labels: ${labels},
+              milestone: ${milestone}
             })")
             echo "Response: ${body_json}"
           done
