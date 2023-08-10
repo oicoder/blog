@@ -1,22 +1,50 @@
-name: Create Issue
-
+name: Add Issue
 on:
   push:
     branches:
       - main
 
-permissions:
-  contents: read
-  issues: write 
-
 jobs:
-  stuff:
+  addIssue:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: JasonEtco/create-an-issue@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          filename: template/ISSUE_TEMPLATE.md
- 
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Read and process MD file
+      id: process_md
+      run: |
+        # 读取文件内容
+        FILE_CONTENT=$(cat ${{ github.event.inputs.filePath }})
+        
+        # 提取 front-matter 中的 labels、milestone 和 title
+        LABELS=$(echo "$FILE_CONTENT" | grep -oP '(?<=labels:\s)\S+')
+        MILESTONE=$(echo "$FILE_CONTENT" | grep -oP '(?<=milestone:\s)\S+')
+        TITLE=$(echo "$FILE_CONTENT" | grep -oP '(?<=title:\s)\S+')
+        
+        # 提取 front-matter 下面的内容作为 Issue 内容
+        ISSUE_CONTENT=$(echo "$FILE_CONTENT" | awk '/---/{n++} n==2')
+
+        # 设置输出变量
+        echo "::set-output name=labels::$LABELS"
+        echo "::set-output name=milestone::$MILESTONE"
+        echo "::set-output name=title::$TITLE"
+        echo "::set-output name=issue_content::$ISSUE_CONTENT"
+
+    - name: Create Issue
+      uses: peter-evans/create-issue@v3
+      with:
+        title: ${{ steps.process_md.outputs.title }}
+        body: ${{ steps.process_md.outputs.issue_content }}
+        labels: ${{ steps.process_md.outputs.labels }}
+        milestone: ${{ steps.process_md.outputs.milestone }}
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
