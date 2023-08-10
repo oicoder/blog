@@ -38,17 +38,15 @@ jobs:
           for added_file in "${added_files[@]}"; do
             echo "Do something with this ${added_file}."
             body=$(cat "${added_file}")
+            body_json=$(printf '%s' "${body}" | sed 's/"/\\"/g' | jq -Rs '.' | tr -d '\n')
             title=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.title);")
             labels=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.labels);")
-            milestone=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.milestone);")
-            echo "${body}, title: ${title}, labels: ${labels}, milestone: ${milestone}."
+            echo "title: ${title}, body: ${body_json}, labels: ${labels}."
             echo "Sending POST request..."
-            body_json=$(printf '%s' "${body}" | sed 's/"/\\"/g' | jq -Rs '.' | tr -d '\n')
             response=$(node -e "const axios = require('axios'); axios.post('https://api.github.com/repos/oicoder/blog/issues', {
               title: '${title}',
               body: '${body_json}',
-              labels: ${labels},
-              milestone: ${milestone}
+              labels: ${labels}
             })")
-            echo "Response: ${body_json}"
+            echo "Response: ${response}"
           done
