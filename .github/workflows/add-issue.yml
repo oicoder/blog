@@ -23,6 +23,7 @@ jobs:
 
       - name: List all added files
         run: |
-          for file in ${{ steps.added-files.outputs.added }}; do
-            echo "$file was added"
+          for file in ${{ steps.added-files.outputs.deleted }}; do
+            echo "$file was deleted"
+            echo "${HOME}/files_deleted.json"
           done
