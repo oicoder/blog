@@ -23,6 +23,9 @@ jobs:
       - name: Install front-matter
         run: npm install front-matter
 
+      - name: Install axios
+        run: npm install axios
+
       - name: Get Added Files
         id: files
         uses: jitterbit/get-changed-files@v1
@@ -39,5 +42,12 @@ jobs:
             labels=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.labels);")
             milestone=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.milestone);")
             echo "${body}, title: ${title}, labels: ${labels}, milestone: ${milestone}."
-            echo "添加 ${title} 成功"
+            echo "Sending POST request..."
+            response=$(node -e "const axios = require('axios'); axios.post('https://api.github.com/repos/oicoder/blog/issues', {
+              title: '${title}',
+              body: '${body}',
+              labels: '${labels}',
+              milestone: '${milestone}'
+            })")
+            echo "Response: "
           done
