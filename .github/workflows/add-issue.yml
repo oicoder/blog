@@ -12,24 +12,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 14
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Read MD files
-      - id: files
-        uses: jitterbit/get-changed-files@v1
+      - name: Get Added Files
+        id: added-files
+        uses: lots0logs/gh-action-get-changed-files@2.2.2
         with:
-          format: 'csv'
-      - run: |
-          mapfile -d ',' -t added_modified_files < <(printf '%s,' '${{ steps.files.outputs.added_modified }}')
-          for added_modified_file in "${added_modified_files[@]}"; do
-            echo "Do something with this ${added_modified_file}."
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List all added files
+        run: |
+          for file in ${{ steps.added-files.outputs.added }}; do
+            echo "$file was added"
           done
