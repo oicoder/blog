@@ -5,13 +5,18 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  issues: write 
+
 jobs:
-  create-issue:
+  stuff:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Create Issue
-      run: |
-        echo "Creating new issue..."
-        cat ISSUE_TEMPLATE.md | sed -e "s/{{title}}/$GITHUB_EVENT_TITLE/" | sed -e "s/{{body}}/$GITHUB_EVENT_BODY/" | github-issue create
-        
+      - uses: actions/checkout@v3
+      - uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          filename: template/ISSUE_TEMPLATE.md
+ 
