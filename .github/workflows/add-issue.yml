@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'blog/**/*.md'
 
 jobs:
   addIssue:
@@ -24,34 +26,24 @@ jobs:
       id: process_md
       run: |
         # Read file content
-        FILE_CONTENT=$(cat ${{ github.event.inputs.filePath }})
+        FILE_PATHS=$(find blog -name '*.md')
         
-        # Extract labels, milestone, and title from front-matter
-        LABELS=$(echo "$FILE_CONTENT" | grep -oP '(?<=labels:\s)\S+')
-        MILESTONE=$(echo "$FILE_CONTENT" | grep -oP '(?<=milestone:\s)\S+')
-        TITLE=$(echo "$FILE_CONTENT" | grep -oP '(?<=title:\s)\S+')
-        
-        # Extract content below front-matter as issue content
-        ISSUE_CONTENT=$(echo "$FILE_CONTENT" | awk '/---/{n++} n==2')
-
-        # Set output variables
-        echo "::set-output name=labels::$LABELS"
-        echo "::set-output name=milestone::$MILESTONE"
-        echo "::set-output name=title::$TITLE"
-        echo "::set-output name=issue_content::$ISSUE_CONTENT"
-
-    - name: Create Issue
-      uses: actions/github-script@v5
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const { context, github } = require('@actions/github');
-          const { title, body, labels, milestone } = context.payload.inputs;
+        for FILE_PATH in $FILE_PATHS; do
+          FILE_CONTENT=$(cat $FILE_PATH)
           
-          github.issues.create({
-            ...context.repo,
-            title,
-            body,
-            labels: labels.split(','),
-            milestone
-          });
+          # Extract labels, milestone, and title from front-matter
+          LABELS=$(echo "$FILE_CONTENT" | grep -oP '(?<=labels:\s)\S+')
+          MILESTONE=$(echo "$FILE_CONTENT" | grep -oP '(?<=milestone:\s)\S+')
+          TITLE=$(echo "$FILE_CONTENT" | grep -oP '(?<=title:\s)\S+')
+          
+          # Extract content below front-matter as issue content
+          ISSUE_CONTENT=$(echo "$FILE_CONTENT" | awk '/---/{n++} n==2')
+
+          # Create issue using the extracted information
+          # Replace the following line with your own code to create the issue
+          echo "Creating issue for file: $FILE_PATH"
+          echo "Labels: $LABELS"
+          echo "Milestone: $MILESTONE"
+          echo "Title: $TITLE"
+          echo "Issue Content: $ISSUE_CONTENT"
+        done
