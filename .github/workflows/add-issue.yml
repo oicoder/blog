@@ -23,28 +23,35 @@ jobs:
     - name: Read and process MD file
       id: process_md
       run: |
-        # 读取文件内容
+        # Read file content
         FILE_CONTENT=$(cat ${{ github.event.inputs.filePath }})
         
-        # 提取 front-matter 中的 labels、milestone 和 title
+        # Extract labels, milestone, and title from front-matter
         LABELS=$(echo "$FILE_CONTENT" | grep -oP '(?<=labels:\s)\S+')
         MILESTONE=$(echo "$FILE_CONTENT" | grep -oP '(?<=milestone:\s)\S+')
         TITLE=$(echo "$FILE_CONTENT" | grep -oP '(?<=title:\s)\S+')
         
-        # 提取 front-matter 下面的内容作为 Issue 内容
+        # Extract content below front-matter as issue content
         ISSUE_CONTENT=$(echo "$FILE_CONTENT" | awk '/---/{n++} n==2')
 
-        # 设置输出变量
+        # Set output variables
         echo "::set-output name=labels::$LABELS"
         echo "::set-output name=milestone::$MILESTONE"
         echo "::set-output name=title::$TITLE"
         echo "::set-output name=issue_content::$ISSUE_CONTENT"
 
     - name: Create Issue
-      uses: peter-evans/create-issue@v3
+      uses: actions/github-script@v5
       with:
-        title: ${{ steps.process_md.outputs.title }}
-        body: ${{ steps.process_md.outputs.issue_content }}
-        labels: ${{ steps.process_md.outputs.labels }}
-        milestone: ${{ steps.process_md.outputs.milestone }}
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const { context, github } = require('@actions/github');
+          const { title, body, labels, milestone } = context.payload.inputs;
+          
+          github.issues.create({
+            ...context.repo,
+            title,
+            body,
+            labels: labels.split(','),
+            milestone
+          });
