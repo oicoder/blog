@@ -24,22 +24,12 @@ jobs:
       run: npm install
 
     - name: Read MD files
-      id: read_md_files
-      run: |
-        # Find all added or modified files
-        CHANGED_FILES=$(git diff --name-only --diff-filter=AM origin/main...HEAD)
-
-        # Filter Markdown files
-        MD_FILES=$(echo "$CHANGED_FILES" | grep -E '\.md$')
-
-        # Process each Markdown file
-        for FILE_PATH in $MD_FILES; do
-          # Read file content
-          FILE_CONTENT=$(cat $FILE_PATH)
-
-          # Extract information from the content as needed
-          # Replace the following lines with your own code to process the file
-          echo "Processing file: $FILE_PATH"
-          echo "File content: $FILE_CONTENT"
-        done
-        
+      - id: files
+        uses: jitterbit/get-changed-files@v1
+        with:
+          format: 'csv'
+      - run: |
+          mapfile -d ',' -t added_modified_files < <(printf '%s,' '${{ steps.files.outputs.added_modified }}')
+          for added_modified_file in "${added_modified_files[@]}"; do
+            echo "Do something with this ${added_modified_file}."
+          done
