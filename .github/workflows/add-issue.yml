@@ -48,7 +48,7 @@ jobs:
               assignees: [
                 'oicoder'
               ],
-              body: '${body_json}',
+              body: ${body_json},
               labels: ${labels}
             }, {
               headers: {
