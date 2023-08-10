@@ -39,4 +39,11 @@ jobs:
             labels=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.labels);")
             milestone=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.milestone);")
             echo "${body}, title: ${title}, labels: ${labels}, milestone: ${milestone}."
+            # 替换为你的仓库和操作的相关信息
+            curl -X POST \
+              -H "Accept: application/vnd.github.v3+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -d '{"title":"'${title}'","body":"'${body}'","labels":["'${labels[@]}'"],"milestone":"'${milestone}'"}' \
+              https://api.github.com/repos/oicoder/blog/issues
+            echo "添加 ${title} 成功"
           done
