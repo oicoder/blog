@@ -15,6 +15,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+
+      - name: Install front-matter
+        run: npm install front-matter
+
       - name: Get Added Files
         id: files
         uses: jitterbit/get-changed-files@v1
@@ -27,5 +35,8 @@ jobs:
           for added_file in "${added_files[@]}"; do
             echo "Do something with this ${added_file}."
             body=$(cat "${added_file}")
-            echo "${body}"
+            title=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.title);")
+            labels=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.labels);")
+            milestone=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.milestone);")
+            echo "${body}, title: ${title}, labels: ${labels}, milestone: ${milestone}."
           done
