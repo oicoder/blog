@@ -25,5 +25,7 @@ jobs:
         run: |
           mapfile -d ',' -t added_files < <(printf '%s,' '${{ steps.files.outputs.added }}')
           for added_file in "${added_files[@]}"; do
-            echo "Do something with this ${added_modified_file}."
+            echo "Do something with this ${added_file}."
+            body=$(cat "${added_file}")
+            echo "${body}"
           done
