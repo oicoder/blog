@@ -34,7 +34,7 @@ jobs:
 
       - name: List all added files
         run: |
-          mapfile -d ',' -t added_files < <(printf '%s,' '${{ steps.files.outputs.added }}')
+          mapfile -d ',' -t added_files < <(printf '%s,' '${{ steps.files.outputs.removed }}')
           for added_file in "${added_files[@]}"; do
             echo "Do something with this ${added_file}."
             body=$(cat "${added_file}")
@@ -43,6 +43,6 @@ jobs:
             milestone=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.milestone);")
             echo "${body}, title: ${title}, labels: ${labels}, milestone: ${milestone}."
             echo "Sending POST request..."
-            body_json=$(node -e "console.log(JSON.stringify(${body}))")
+            body_json=$(printf '%s' "${body}" | sed 's/"/\\"/g' | jq -Rs '.' | tr -d '\n')
             echo "Response: ${body_json}"
           done
