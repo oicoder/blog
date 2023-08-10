@@ -45,8 +45,15 @@ jobs:
             echo "Sending POST request..."
             response=$(node -e "const axios = require('axios'); axios.post('https://api.github.com/repos/oicoder/blog/issues', {
               title: '${title}',
+              assignees: [
+                'oicoder'
+              ],
               body: '${body_json}',
               labels: ${labels}
+            }, {
+              headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
             })")
             echo "Response: ${response}"
           done
