@@ -1,13 +1,14 @@
-name: Add Issue
+name: Read MD Files
 on:
   push:
     branches:
       - main
     paths:
+      - '*.md'
       - '**/*.md'
 
 jobs:
-  addIssue:
+  readFiles:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,28 +23,23 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Read and process MD file
-      id: process_md
+    - name: Read MD files
+      id: read_md_files
       run: |
-        # Read file content
-        FILE_PATHS=$(find blog -name '*.md')
-        
-        for FILE_PATH in $FILE_PATHS; do
-          FILE_CONTENT=$(cat $FILE_PATH)
-          
-          # Extract labels, milestone, and title from front-matter
-          LABELS=$(echo "$FILE_CONTENT" | grep -oP '(?<=labels:\s)\S+')
-          MILESTONE=$(echo "$FILE_CONTENT" | grep -oP '(?<=milestone:\s)\S+')
-          TITLE=$(echo "$FILE_CONTENT" | grep -oP '(?<=title:\s)\S+')
-          
-          # Extract content below front-matter as issue content
-          ISSUE_CONTENT=$(echo "$FILE_CONTENT" | awk '/---/{n++} n==2')
+        # Find all added or modified files
+        CHANGED_FILES=$(git diff --name-only --diff-filter=AM origin/main...HEAD)
 
-          # Create issue using the extracted information
-          # Replace the following line with your own code to create the issue
-          echo "Creating issue for file: $FILE_PATH"
-          echo "Labels: $LABELS"
-          echo "Milestone: $MILESTONE"
-          echo "Title: $TITLE"
-          echo "Issue Content: $ISSUE_CONTENT"
+        # Filter Markdown files
+        MD_FILES=$(echo "$CHANGED_FILES" | grep -E '\.md$')
+
+        # Process each Markdown file
+        for FILE_PATH in $MD_FILES; do
+          # Read file content
+          FILE_CONTENT=$(cat $FILE_PATH)
+
+          # Extract information from the content as needed
+          # Replace the following lines with your own code to process the file
+          echo "Processing file: $FILE_PATH"
+          echo "File content: $FILE_CONTENT"
         done
+        
