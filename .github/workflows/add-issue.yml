@@ -43,11 +43,6 @@ jobs:
             milestone=$(node -e "const fs = require('fs'); const fm = require('front-matter'); const content = fs.readFileSync('${added_file}', 'utf8'); const parsed = fm(content); console.log(parsed.attributes.milestone);")
             echo "${body}, title: ${title}, labels: ${labels}, milestone: ${milestone}."
             echo "Sending POST request..."
-            response=$(node -e "const axios = require('axios'); axios.post('https://api.github.com/repos/oicoder/blog/issues', {
-              title: '${title}',
-              body: '${body}',
-              labels: '${labels}',
-              milestone: '${milestone}'
-            })")
+            
             echo "Response: "
           done
